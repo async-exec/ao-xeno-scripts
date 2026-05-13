@@ -208,8 +208,6 @@ end
 
 -- CONNECTIONS
 
-local AttackToggleConn
-local CannonToggleConn
 local DarkSeaConns = {}
 local ChestAddConns = {}
 local ChestRemoveConns = {}
@@ -225,18 +223,6 @@ local noClipParts = {}
 local hitboxSizes = {}
 
 local disableFunctions = {
-	AttackToggle = function()
-		if AttackToggleConn  then
-			AttackToggleConn:Disconnect()
-			AttackToggleConn = nil
-		end
-	end,
-	CannonToggle = function()
-		if CannonToggleConn  then
-			CannonToggleConn:Disconnect()
-			CannonToggleConn = nil
-		end
-	end,
 	SpeedToggle = function()
 		runService:UnbindFromRenderStep("walkspeedToggle")
 		local humanoid = character and character:FindFirstChild("Humanoid")
@@ -389,99 +375,14 @@ local disableFunctions = {
 		hitboxSizes = {}
 	end,
 }
--- FUNCTION PLACEHOLDERS
-
-local TpAttacks
-local TpCannonballs
-
 -- GUI
 
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox('Attack Teleports')
 local MovementBox = Tabs.Main:AddRightGroupbox("Movement")
 local OtherBox = Tabs.Main:AddLeftGroupbox("Other")
 local LeftRandomBox = Tabs.Randoms:AddLeftGroupbox('Stuff')
 local RightRandomBox = Tabs.Randoms:AddRightGroupbox('More stuff')
 
 -- FUNCTIONS
-
-TpAttacks = function(Value: boolean)
-	local function tpToTarget(effect: any)
-		if effect.Name == "Blast" and effect:IsA("BasePart") then
-			local target = getClosestEnemy(Options.PveToggle.Value, Options.PvpToggle.Value)
-			if not target then return end
-
-			local targetHRP = target:FindFirstChild("HumanoidRootPart")
-			if not targetHRP then return end
-
-			if effect:IsA("BasePart") then
-				task.spawn(function()
-					while effect.Parent == workspace.Effects do
-						if target and targetHRP then
-							effect.CFrame = targetHRP.CFrame
-							task.wait()
-						else break
-						end
-					end
-				end)
-			end
-		end
-	end
-
-	if Value then
-		AttackToggleConn = workspace.Effects.ChildAdded:Connect(tpToTarget)
-	else
-		disableFunctions["AttackToggle"]()
-	end
-end
-
-TpCannonballs = function(Value: boolean)
-	local function tpToTarget(effect: any)
-		if effect.Name ~= "Cannonball" then
-			return
-		end
-
-		if not effect:IsA("BasePart") then
-			return
-		end
-		if Toggles.CannonFortToggle.Value then
-			task.spawn(function()
-				local placeId = game.PlaceId
-				local tCF = CFrame.new(0,0,0)
-				if placeId == 12604352060 then
-					tCF = CFrame.new(18924.5762, 460.34613, 12807.1475)
-				elseif placeId == 15449776494 then
-					tCF = CFrame.new(3044.59399, 515.677246, -8690.51758)
-				end
-				while effect.Parent == workspace.Effects do
-					effect.CFrame = tCF
-					task.wait()
-				end
-			end)
-		else
-			local targetBoat = getClosestBoat(Options.CannonPveToggle.Value, Options.CannonPvpToggle.Value)
-			if not targetBoat then return end
-
-			local targetPart = targetBoat.PrimaryPart
-			if not targetPart then return end
-
-			task.spawn(function()
-				while effect.Parent == workspace.Effects do
-					if targetBoat and targetPart then
-						effect.CFrame = targetPart.CFrame
-						task.wait()
-					else break
-					end
-				end
-			end)
-		end
-	end
-
-	if Value then
-		CannonToggleConn = workspace.Effects.ChildAdded:Connect(tpToTarget)
-	else
-		disableFunctions["CannonToggle"]()
-	end
-end
 
 SpeedHack = function(Value: boolean)
 	if Value then
@@ -579,59 +480,6 @@ NoclipHack = function(Value: boolean)
 		disableFunctions["NoClipToggle"]()
 	end
 end
-
-LeftGroupBox:AddToggle('PvpToggle', {
-	Text = 'Toggle tp attack to player',
-	Default = false,
-	Tooltip = 'If enabled then attacks will also tp to players (not you)'
-})
-
-LeftGroupBox:AddToggle("PveToggle",{
-	Text = 'Toggle tp attack to npc',
-	Default = true,
-	Tooltip = 'If enabled then attacks will tp to npcs'
-})
-LeftGroupBox:AddToggle("AttackToggle", {
-	Text = "Tp attacks closest enemy",
-	Default = false,
-	Tooltip = "Tp attacks to closest enemy currently only works with magic blasts \n (magic m1 and the first magic move)",
-	Callback = TpAttacks
-}):AddKeyPicker("AttackToggleKey", {
-	Default = "",
-	SyncToggleState = true,
-	Text = "Blast teleport toggle"
-})
-
-LeftGroupBox:AddDivider()
-
-LeftGroupBox:AddToggle('CannonPvpToggle', {
-	Text = 'Tps player ship',
-	Default = false,
-	Tooltip = 'If enabled then cannonballs will also tp to nearest plr ship'
-})
-
-LeftGroupBox:AddToggle("CannonPveToggle",{
-	Text = 'Tps bot ship',
-	Default = true,
-	Tooltip = 'If enabled then cannonballs will tp to nearest bot ship'
-})
-
-LeftGroupBox:AddToggle("CannonFortToggle",{
-	Text = 'Tps fort (overrides others)',
-	Default = false,
-	Tooltip = 'Tps cannonballs to either fort castrum or fort montu (will auto select)'
-})
-
-LeftGroupBox:AddToggle("CannonToggle",{
-	Text = 'Tps cannonballs to ship',
-	Default = false,
-	Tooltip = 'If enabled then cannonballs will tp to nearest ship',
-	Callback = tpCannonballs
-}):AddKeyPicker("CannonToggleKey", {
-	Default = "",
-	SyncToggleState = true,
-	Text = "Cannon Tp Toggle"
-})
 
 MovementBox:AddInput("SpeedBox",
 	{
