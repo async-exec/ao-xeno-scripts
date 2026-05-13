@@ -202,6 +202,14 @@ local function getClosestBoat(pve: boolean?, pvp: boolean?): Model?
 	return closestBoat
 end
 
+local function teleportTo(cframe)
+	local hrp = character and character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	hrp.CFrame = cframe
+	hrp.AssemblyLinearVelocity = Vector3.new()
+	hrp.AssemblyAngularVelocity = Vector3.new()
+end
+
 -- CONNECTIONS
 
 local DarkSeaConns = {}
@@ -673,7 +681,7 @@ MovementBox:AddButton({
 	Func = function()
 		if workspace.Camera:FindFirstChild("StoryMarker1") then
 			if character and character.HumanoidRootPart then
-				character.HumanoidRootPart.CFrame = workspace.Camera.StoryMarker1.CFrame
+				teleportTo(workspace.Camera.StoryMarker1.CFrame)
 			end
 		end
 	end,
@@ -687,7 +695,7 @@ MovementBox:AddButton({
 			for _, child in ipairs(workspace.NPCs:GetDescendants()) do
 				if child:IsA("BillboardGui") then
 					if child.Name == "Story" then
-						character.HumanoidRootPart.CFrame = child.Parent.CFrame
+						teleportTo(child.Parent.CFrame)
 					end
 				end
 			end
@@ -701,7 +709,7 @@ MovementBox:AddButton({
 	Func = function()
 		if workspace.Camera:FindFirstChild("QuestMarker1") then
 			if character and character.HumanoidRootPart then
-				character.HumanoidRootPart.CFrame = workspace.Camera.QuestMarker1.CFrame
+				teleportTo(workspace.Camera.QuestMarker1.CFrame)
 			end
 		end
 	end,
@@ -713,7 +721,7 @@ MovementBox:AddButton({
 	Func = function()
 		if workspace.Camera:FindFirstChild("Marker") then
 			if character and character.HumanoidRootPart then
-				character.HumanoidRootPart.CFrame = workspace.Camera.Marker.CFrame
+				teleportTo(workspace.Camera.Marker.CFrame)
 			end
 		end
 	end,
@@ -727,10 +735,10 @@ MovementBox:AddButton({
 		if ship then
 			if ship:FindFirstChild("Grate") then
 				if character and character.HumanoidRootPart then
-					character.HumanoidRootPart.CFrame = ship.Grate.CFrame
+					teleportTo(ship.Grate.CFrame)
 				end
 			else
-				character.HumanoidRootPart.CFrame = ship.WorldPivot
+				teleportTo(ship.WorldPivot)
 			end
 		end
 	end,
@@ -767,7 +775,7 @@ MovementBox:AddButton({
 				local char = target.Character
 				local hrp = char and char:FindFirstChild("HumanoidRootPart")
 				if hrp then
-					character.HumanoidRootPart.CFrame = hrp.CFrame * CFrame.new(0, 5, 0)
+					teleportTo(hrp.CFrame * CFrame.new(0, 5, 0))
 				end
 			end
 		end
@@ -799,7 +807,7 @@ MovementBox:AddToggle("TpCheckpointToggle", {
 	Callback = function(Value)
 		if Value then
 			if character and character.HumanoidRootPart and checkpointPos then
-				character.HumanoidRootPart.CFrame = CFrame.new(checkpointPos) * CFrame.new(0, 5, 0)
+				teleportTo(CFrame.new(checkpointPos) * CFrame.new(0, 5, 0))
 			end
 			Toggles.TpCheckpointToggle:SetValue(false)
 		end
@@ -829,7 +837,7 @@ MovementBox:AddDropdown('IslandTp', {
 
 	Callback = function(Value)
 		if character and character.HumanoidRootPart then
-			character.HumanoidRootPart.CFrame = workspace.Map[Value]["Center"].CFrame
+			teleportTo(workspace.Map[Value]["Center"].CFrame)
 		end
 	end
 })
@@ -851,7 +859,7 @@ MovementBox:AddToggle("CtrlClickToggle",{
 							local targetPos = mouse.Hit and mouse.Hit.Position
 							if targetPos then
 								canTp = false
-								character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+								teleportTo(CFrame.new(targetPos))
 								task.delay(0.15, function()
 									canTp =true
 								end)
@@ -939,7 +947,7 @@ OtherBox:AddButton({
 			end
 		end
 		if closestPos then
-			hrp.CFrame = CFrame.new(closestPos) * CFrame.new(0, 5, 0)
+			teleportTo(CFrame.new(closestPos) * CFrame.new(0, 5, 0))
 		end
 	end,
 })
