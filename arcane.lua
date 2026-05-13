@@ -4,13 +4,9 @@ local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
 local player = game.Players.LocalPlayer
 local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-local lastDeathPos
+local checkpointPos
+
 player.CharacterAdded:Connect(function(char)
-	local oldChar = character
-	local oldHrp = oldChar and oldChar:FindFirstChild("HumanoidRootPart")
-	if oldHrp then
-		lastDeathPos = oldHrp.Position
-	end
 	character = char
 end)
 
@@ -740,37 +736,60 @@ MovementBox:AddButton({
 	Tooltip = "Teleports to your ship if it exists."
 })
 
-MovementBox:AddInput("TpPlayerName", {
-	Default = "",
-	Text = "Player name to tp to",
-	Finished = true,
-})
+local function refreshPlayerList()
+	local plrs = {}
+	for _, plr in game.Players:GetPlayers() do
+		if plr ~= player then
+			table.insert(plrs, plr.Name)
+		end
+	end
+	return #plrs > 0 and plrs or {"No players"}
+end
 
-MovementBox:AddButton({
-	Text = "Tp to player",
-	Tooltip = "Teleports to the specified player",
-	Func = function()
-		local target = Options.TpPlayerName.Value
-		if target == "" then return end
-		for _, plr in game.Players:GetPlayers() do
-			if plr.Name:lower():find(target:lower()) then
-				local char = plr.Character
+MovementBox:AddDropdown('TpPlayerDropdown', {
+	Values = refreshPlayerList(),
+	Default = 0,
+	Multi = false,
+	Text = 'Tp to player',
+	Tooltip = 'Teleports to selected player',
+	Callback = function(Value)
+		if character and character.HumanoidRootPart then
+			local target = game.Players:FindFirstChild(Value)
+			if target then
+				local char = target.Character
 				local hrp = char and char:FindFirstChild("HumanoidRootPart")
-				if character and character.HumanoidRootPart and hrp then
+				if hrp then
 					character.HumanoidRootPart.CFrame = hrp.CFrame
 				end
-				break
 			end
 		end
 	end,
 })
 
 MovementBox:AddButton({
-	Text = "Tp to last death",
-	Tooltip = "Teleports to where you last died",
+	Text = "Refresh players",
+	Tooltip = "Refreshes the player list in the dropdown",
 	Func = function()
-		if character and character.HumanoidRootPart and lastDeathPos then
-			character.HumanoidRootPart.Position = lastDeathPos
+		Options.TpPlayerDropdown:SetValues(refreshPlayerList())
+	end,
+})
+
+MovementBox:AddButton({
+	Text = "Set checkpoint",
+	Tooltip = "Saves your current position as a teleport checkpoint",
+	Func = function()
+		if character and character.HumanoidRootPart then
+			checkpointPos = character.HumanoidRootPart.Position
+		end
+	end,
+})
+
+MovementBox:AddButton({
+	Text = "Tp to checkpoint",
+	Tooltip = "Teleports to your saved checkpoint",
+	Func = function()
+		if character and character.HumanoidRootPart and checkpointPos then
+			character.HumanoidRootPart.CFrame = CFrame.new(checkpointPos)
 		end
 	end,
 })
