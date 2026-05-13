@@ -792,14 +792,22 @@ MovementBox:AddButton({
 	end,
 })
 
-MovementBox:AddButton({
+MovementBox:AddToggle("TpCheckpointToggle", {
 	Text = "Tp to checkpoint",
-	Tooltip = "Teleports to your saved checkpoint",
-	Func = function()
-		if character and character.HumanoidRootPart and checkpointPos then
-			character.HumanoidRootPart.CFrame = CFrame.new(checkpointPos) * CFrame.new(0, 5, 0)
+	Default = false,
+	Tooltip = "Press the keybind to teleport to your saved checkpoint",
+	Callback = function(Value)
+		if Value then
+			if character and character.HumanoidRootPart and checkpointPos then
+				character.HumanoidRootPart.CFrame = CFrame.new(checkpointPos) * CFrame.new(0, 5, 0)
+			end
+			Toggles.TpCheckpointToggle:SetValue(false)
 		end
 	end,
+}):AddKeyPicker("TpCheckpointKey", {
+	Default = "",
+	SyncToggleState = true,
+	Text = "Tp to checkpoint"
 })
 
 local dropDownIsland = {}
