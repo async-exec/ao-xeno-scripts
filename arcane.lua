@@ -4,7 +4,13 @@ local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
 local player = game.Players.LocalPlayer
 local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+local lastDeathPos
 player.CharacterAdded:Connect(function(char)
+	local oldChar = character
+	local oldHrp = oldChar and oldChar:FindFirstChild("HumanoidRootPart")
+	if oldHrp then
+		lastDeathPos = oldHrp.Position
+	end
 	character = char
 end)
 
@@ -216,6 +222,7 @@ local GalleonToggle
 local ModConn
 local killAllConn
 local noClipParts = {}
+local hitboxSizes = {}
 
 local disableFunctions = {
 	AttackToggle = function()
@@ -371,6 +378,15 @@ local disableFunctions = {
 				part.CanCollide = true
 			end
 		end
+	end,
+	HitboxToggle = function()
+		runService:UnbindFromRenderStep("HitboxExpand")
+		for part, size in pairs(hitboxSizes) do
+			if part and part:IsA("BasePart") then
+				part.Size = size
+			end
+		end
+		hitboxSizes = {}
 	end,
 }
 -- FUNCTION PLACEHOLDERS
@@ -874,6 +890,41 @@ MovementBox:AddButton({
 		end
 	end,
 	Tooltip = "Teleports to your ship if it exists."
+})
+
+MovementBox:AddInput("TpPlayerName", {
+	Default = "",
+	Text = "Player name to tp to",
+	Finished = true,
+})
+
+MovementBox:AddButton({
+	Text = "Tp to player",
+	Tooltip = "Teleports to the specified player",
+	Func = function()
+		local target = Options.TpPlayerName.Value
+		if target == "" then return end
+		for _, plr in game.Players:GetPlayers() do
+			if plr.Name:lower():find(target:lower()) then
+				local char = plr.Character
+				local hrp = char and char:FindFirstChild("HumanoidRootPart")
+				if character and character.HumanoidRootPart and hrp then
+					character.HumanoidRootPart.CFrame = hrp.CFrame
+				end
+				break
+			end
+		end
+	end,
+})
+
+MovementBox:AddButton({
+	Text = "Tp to last death",
+	Tooltip = "Teleports to where you last died",
+	Func = function()
+		if character and character.HumanoidRootPart and lastDeathPos then
+			character.HumanoidRootPart.Position = lastDeathPos
+		end
+	end,
 })
 
 local dropDownIsland = {}
@@ -1531,6 +1582,43 @@ OtherBox:AddToggle("GodModeToggle", {
 	Default = "",
 	SyncToggleState = true,
 	Text = "God Mode"
+})
+
+OtherBox:AddInput("HitboxScale", {
+	Default = "2",
+	Text = "Hitbox scale",
+	Numeric = true,
+	Finished = true,
+})
+
+OtherBox:AddToggle("HitboxToggle", {
+	Text = 'Hitbox Expander',
+	Default = false,
+	Tooltip = 'Scales all enemy hitboxes by the multiplier',
+	Callback = function(Value)
+		if Value then
+			runService:BindToRenderStep("HitboxExpand", 0, function()
+				local scale = tonumber(Options.HitboxScale.Value) or 2
+				for enemy in pairs(enemies) do
+					if not enemy then continue end
+					for _, part in enemy:GetDescendants() do
+						if part:IsA("BasePart") then
+							if not hitboxSizes[part] then
+								hitboxSizes[part] = part.Size
+							end
+							part.Size = hitboxSizes[part] * scale
+						end
+					end
+				end
+			end)
+		else
+			disableFunctions["HitboxToggle"]()
+		end
+	end,
+}):AddKeyPicker("HitboxToggleKey", {
+	Default = "",
+	SyncToggleState = true,
+	Text = "Hitbox Expander"
 })
 
 
