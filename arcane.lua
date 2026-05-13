@@ -217,6 +217,7 @@ local ModConn
 local killAllConn
 local noClipParts = {}
 local hitboxSizes = {}
+local canTpChest
 
 local disableFunctions = {
 	SpeedToggle = function()
@@ -867,7 +868,7 @@ OtherBox:AddToggle("ChestToggle_Uncommon", {
 
 OtherBox:AddToggle("ChestToggle_Rare", {
 	Text = "Rare Chest",
-	Default = true,
+	Default = false,
 })
 
 OtherBox:AddToggle("ChestToggle_Mystic", {
@@ -882,8 +883,11 @@ OtherBox:AddToggle("ChestToggle_Legendary", {
 
 OtherBox:AddButton({
 	Text = "Tp to nearest chest",
-	Tooltip = "Teleports to the nearest chest of an enabled type",
+	Tooltip = "Teleports to the nearest chest of an enabled type (10s cooldown)",
 	Func = function()
+		if canTpChest then return end
+		canTpChest = true
+		task.delay(10, function() canTpChest = false end)
 		if not character or not character:FindFirstChild("HumanoidRootPart") then return end
 		local hrp = character.HumanoidRootPart
 		local closestDist = math.huge
