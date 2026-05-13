@@ -204,10 +204,24 @@ end
 
 local function teleportTo(cframe)
 	local hrp = character and character:FindFirstChild("HumanoidRootPart")
+	local hum = character and character:FindFirstChildOfClass("Humanoid")
 	if not hrp then return end
+	local rayParams = RaycastParams.new()
+	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+	rayParams.FilterDescendantsInstances = {character, workspace.Effects}
+	local hit = workspace:Raycast(cframe.Position, Vector3.new(0, -1000, 0), rayParams)
+	if not hit then
+		Library:Notify("Can't teleport: no ground found below target")
+		return
+	end
 	hrp.CFrame = cframe
 	hrp.AssemblyLinearVelocity = Vector3.new()
 	hrp.AssemblyAngularVelocity = Vector3.new()
+	if hum then
+		hum.PlatformStand = true
+		task.wait()
+		hum.PlatformStand = false
+	end
 end
 
 -- CONNECTIONS
@@ -850,8 +864,7 @@ MovementBox:AddToggle("CtrlClickToggle",{
 		if Value then
 			local canTp = true
 			runService:BindToRenderStep("CtrlClickToggle", Enum.RenderPriority.Input.Value, function()
-				local hrp = character and character:FindFirstChild("HumanoidRootPart")
-				if not character:FindFirstChild("HumanoidRootPart") then return end
+				if not character or not character:FindFirstChild("HumanoidRootPart") then return end
 				if canTp then
 					local mouse = player:GetMouse()
 					if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.RightControl) then
@@ -861,7 +874,7 @@ MovementBox:AddToggle("CtrlClickToggle",{
 								canTp = false
 								teleportTo(CFrame.new(targetPos))
 								task.delay(0.15, function()
-									canTp =true
+									canTp = true
 								end)
 							end
 						end
