@@ -1399,14 +1399,22 @@ OtherBox:AddButton({
 	end,
 })
 
-OtherBox:AddButton({
+OtherBox:AddToggle("WashToggle", {
 	Text = "Wash",
-	Tooltip = "Removes dark sea weater poison",
-	Func = function()
-		if game.ReplicatedStorage.RS.Remotes.Boats:FindFirstChild("Wash") then
-			game.ReplicatedStorage.RS.Remotes.Boats.Wash:FireServer()
+	Default = false,
+	Tooltip = "Removes dark sea weather poison",
+	Callback = function(Value)
+		if Value then
+			if game.ReplicatedStorage.RS.Remotes.Boats:FindFirstChild("Wash") then
+				game.ReplicatedStorage.RS.Remotes.Boats.Wash:FireServer()
+			end
+			Toggles.WashToggle:SetValue(false)
 		end
 	end,
+}):AddKeyPicker("WashKey", {
+	Default = "",
+	SyncToggleState = true,
+	Text = "Wash"
 })
 
 OtherBox:AddButton({
@@ -1835,12 +1843,20 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-LeftRandomBox:AddButton({
+LeftRandomBox:AddToggle("InsanityToggle", {
 	Text = "Disable insanity",
+	Default = false,
 	Tooltip = "Disables insanity effects. Doesn't disable damage",
-	Func = function()
-		player.PlayerGui.Temp.Insanity.Enabled = false
+	Callback = function(Value)
+		if Value then
+			player.PlayerGui.Temp.Insanity.Enabled = false
+			Toggles.InsanityToggle:SetValue(false)
+		end
 	end,
+}):AddKeyPicker("InsanityKey", {
+	Default = "",
+	SyncToggleState = true,
+	Text = "Disable insanity"
 })
 
 LeftRandomBox:AddButton({
