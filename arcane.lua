@@ -896,6 +896,11 @@ TeleportBox:AddToggle("CtrlClickToggle",{
 						if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
 							local targetPos = mouse.Hit and mouse.Hit.Position
 							if targetPos then
+								local dist = (targetPos - hrp.Position).Magnitude
+								if dist > 250 then
+									Library:Notify("Target too far (" .. math.floor(dist) .. " studs, max 250)")
+									return
+								end
 								canTp = false
 								teleportTo(CFrame.new(targetPos))
 								task.delay(0.15, function()
