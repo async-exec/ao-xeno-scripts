@@ -49,7 +49,10 @@ end)
 
 local Tabs = {
 	Main = Window:AddTab('Main'),
-	Randoms = Window:AddTab("Random stuff"),
+	ESP = Window:AddTab('ESP'),
+	Player = Window:AddTab('Player'),
+	World = Window:AddTab('World'),
+	Farming = Window:AddTab('Farming'),
 	['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
@@ -414,10 +417,15 @@ local disableFunctions = {
 }
 -- GUI
 
+local TeleportBox = Tabs.Main:AddLeftGroupbox("Teleports")
 local MovementBox = Tabs.Main:AddRightGroupbox("Movement")
-local OtherBox = Tabs.Main:AddLeftGroupbox("Other")
-local LeftRandomBox = Tabs.Randoms:AddLeftGroupbox('Stuff')
-local RightRandomBox = Tabs.Randoms:AddRightGroupbox('More stuff')
+local ChestEspBox = Tabs.ESP:AddLeftGroupbox("Chest ESP")
+local EntityEspBox = Tabs.ESP:AddRightGroupbox("Entity ESP")
+local EnhancementBox = Tabs.Player:AddLeftGroupbox("Enhancements")
+local CombatBox = Tabs.Player:AddRightGroupbox("Combat")
+local WorldBox = Tabs.World:AddLeftGroupbox("World")
+local FishingBox = Tabs.Farming:AddLeftGroupbox("Fishing")
+local EconomyBox = Tabs.Farming:AddRightGroupbox("Economy")
 
 -- FUNCTIONS
 
@@ -706,9 +714,7 @@ MovementBox:AddToggle("BoatNoClipToggle", {
 	end,
 })
 
-MovementBox:AddDivider()
-
-MovementBox:AddButton({
+TeleportBox:AddButton({
 	Text = "Teleport current story quest",
 	Func = function()
 		if workspace.Camera:FindFirstChild("StoryMarker1") then
@@ -720,7 +726,7 @@ MovementBox:AddButton({
 	Tooltip = "Teleports to current story quest if marker exists"
 })
 
-MovementBox:AddButton({
+TeleportBox:AddButton({
 	Text = "Other story quest marker tp",
 	Func = function()
 		if character and character.HumanoidRootPart then
@@ -736,7 +742,7 @@ MovementBox:AddButton({
 	Tooltip = "Teleports to current story quest if marker exists. \n It will tp to the question mark symbol instead. Laggier. "
 })
 
-MovementBox:AddButton({
+TeleportBox:AddButton({
 	Text = "Tp current quest",
 	Func = function()
 		if workspace.Camera:FindFirstChild("QuestMarker1") then
@@ -748,7 +754,7 @@ MovementBox:AddButton({
 	Tooltip = "Teleports to current quest if marker exists."
 })
 
-MovementBox:AddButton({
+TeleportBox:AddButton({
 	Text = "Tp map marker",
 	Func = function()
 		if workspace.Camera:FindFirstChild("Marker") then
@@ -760,7 +766,7 @@ MovementBox:AddButton({
 	Tooltip = "Teleports to current quest if marker exists."
 })
 
-MovementBox:AddButton({
+TeleportBox:AddButton({
 	Text = "Tp to ship",
 	Func = function()
 		local ship= workspace.Boats:FindFirstChild(name)
@@ -787,7 +793,7 @@ local function refreshPlayerList()
 	return #plrs > 0 and plrs or {"No players"}
 end
 
-MovementBox:AddDropdown('TpPlayerDropdown', {
+TeleportBox:AddDropdown('TpPlayerDropdown', {
 	Values = refreshPlayerList(),
 	Default = 0,
 	Multi = false,
@@ -795,7 +801,7 @@ MovementBox:AddDropdown('TpPlayerDropdown', {
 	Tooltip = 'Select a player to teleport to',
 })
 
-MovementBox:AddButton({
+TeleportBox:AddButton({
 	Text = "Tp to selected player",
 	Tooltip = "Teleports to the player selected in the dropdown",
 	Func = function()
@@ -814,7 +820,7 @@ MovementBox:AddButton({
 	end,
 })
 
-MovementBox:AddButton({
+TeleportBox:AddButton({
 	Text = "Refresh players",
 	Tooltip = "Refreshes the player list in the dropdown",
 	Func = function()
@@ -822,7 +828,7 @@ MovementBox:AddButton({
 	end,
 })
 
-MovementBox:AddButton({
+TeleportBox:AddButton({
 	Text = "Set checkpoint",
 	Tooltip = "Saves your current position as a teleport checkpoint",
 	Func = function()
@@ -832,7 +838,7 @@ MovementBox:AddButton({
 	end,
 })
 
-MovementBox:AddToggle("TpCheckpointToggle", {
+TeleportBox:AddToggle("TpCheckpointToggle", {
 	Text = "Tp to checkpoint",
 	Default = false,
 	Tooltip = "Press the keybind to teleport to your saved checkpoint",
@@ -859,7 +865,7 @@ if workspace:FindFirstChild("Map") then
 	end
 end
 
-MovementBox:AddDropdown('IslandTp', {
+TeleportBox:AddDropdown('IslandTp', {
 	Values = dropDownIsland,
 	Default = 0,
 	Multi = false,
@@ -874,7 +880,7 @@ MovementBox:AddDropdown('IslandTp', {
 	end
 })
 
-MovementBox:AddToggle("CtrlClickToggle",{
+TeleportBox:AddToggle("CtrlClickToggle",{
 	Text = 'Ctrl click tp to cursor',
 	Default = false,
 	Tooltip = 'If you hold down control and click/hold m1 then you tp to cursor position',
@@ -906,37 +912,71 @@ MovementBox:AddToggle("CtrlClickToggle",{
 	end,
 })
 
-OtherBox:AddLabel('Chest Esp Color'):AddColorPicker('ChestEspColor', {
+ChestEspBox:AddLabel('Chest Esp Color'):AddColorPicker('ChestEspColor', {
 	Default = Color3.new(1, 1, 1),
 	Title = 'CHEST ESP COLOR',
 })
 
-OtherBox:AddToggle("TreasureChestToggle",{
+ChestEspBox:AddToggle("TreasureChestToggle",{
 	Text = 'Common Chest',
 	Default = false,
 })
 
-OtherBox:AddToggle("ChestToggle_Uncommon", {
+ChestEspBox:AddToggle("ChestToggle_Uncommon", {
 	Text = "Uncommon Chest",
 	Default = false,
 })
 
-OtherBox:AddToggle("ChestToggle_Rare", {
+ChestEspBox:AddToggle("ChestToggle_Rare", {
 	Text = "Rare Chest",
 	Default = false,
 })
 
-OtherBox:AddToggle("ChestToggle_Mystic", {
+ChestEspBox:AddToggle("ChestToggle_Mystic", {
 	Text = "Mystic Chest",
 	Default = true,
 })
 
-OtherBox:AddToggle("ChestToggle_Legendary", {
+ChestEspBox:AddToggle("ChestToggle_Legendary", {
 	Text = "Legendary Chest",
 	Default = true,
 })
 
-OtherBox:AddButton({
+ChestEspBox:AddToggle("ChestEspToggle", {
+	Text = 'Chest esp (dont spam pick chests)',
+	Default = false,
+	Tooltip = 'Allows you to see all the chests on the map. (use responsibly) \n might kick you if you lag too much',
+	Callback = function(Value)
+		if Value then
+			local iterate = {
+				workspace.Map,
+				game.ReplicatedStorage.RS.UnloadIslands
+			}
+			for _, parent in ipairs(iterate) do
+				for _, island in ipairs(parent:GetChildren()) do
+					for _, v in ipairs(island:GetChildren()) do
+						if typeof(v) == "Instance" and v.Name == "Chests" then
+							for _, chest in v:GetChildren() do
+								trackChest(chest)
+							end
+							ChestAddConns[v] = v.ChildAdded:Connect(function(chest)
+								trackChest(chest)
+							end)
+						end
+					end
+				end
+			end
+		else
+			disableFunctions["ChestEspToggle"]()
+		end
+	end,
+}):AddKeyPicker("ChestEspToggleKey", {
+	Default = "",
+	SyncToggleState = true,
+	Text = "Chest esp"
+})
+
+ChestEspBox:AddButton({
 	Text = "Tp to nearest chest",
 	Tooltip = "Teleports to the nearest chest of an enabled type (10s cooldown)",
 	Func = function()
@@ -985,6 +1025,7 @@ OtherBox:AddButton({
 })
 
 
+
 local function trackChest(chest)
 	local obj = chest:FindFirstChild("ChestObj")
 	local allowed =
@@ -1024,39 +1065,6 @@ local function trackChest(chest)
 	end
 end
 
-OtherBox:AddToggle("ChestEspToggle", {
-	Text = 'Chest esp (dont spam pick chests)',
-	Default = false,
-	Tooltip = 'Allows you to see all the chests on the map. (use responsibly) \n might kick you if you lag too much',
-	Callback = function(Value)
-		if Value then
-			local iterate = {
-				workspace.Map,
-				game.ReplicatedStorage.RS.UnloadIslands
-			}
-			for _, parent in ipairs(iterate) do
-				for _, island in ipairs(parent:GetChildren()) do
-					for _, v in ipairs(island:GetChildren()) do
-						if typeof(v) == "Instance" and v.Name == "Chests" then
-							for _, chest in v:GetChildren() do
-								trackChest(chest)
-							end
-							ChestAddConns[v] = v.ChildAdded:Connect(function(chest)
-								trackChest(chest)
-							end)
-						end
-					end
-				end
-			end
-		else
-			disableFunctions["ChestEspToggle"]()
-		end
-	end,
-}):AddKeyPicker("ChestEspToggleKey", {
-	Default = "",
-	SyncToggleState = true,
-	Text = "Chest esp"
-})
 
 local Camera = workspace.CurrentCamera
 
@@ -1192,7 +1200,7 @@ end
 
 
 
-OtherBox:AddToggle("PlayerEspToggle", {
+EntityEspBox:AddToggle("PlayerEspToggle", {
 	Text = 'Player ESP',
 	Default = false,
 	Tooltip = 'Shows all player locations',
@@ -1226,7 +1234,7 @@ OtherBox:AddToggle("PlayerEspToggle", {
 })
 
 
-OtherBox:AddButton({
+EntityEspBox:AddButton({
 	Text = 'Boat esp',
 	Default = false,
 	Tooltip = '',
@@ -1261,9 +1269,12 @@ Options.ChestEspColor:OnChanged(function()
 	for _, esp in chestEsps do
 		esp.EspText.TextColor3 = Options.ChestEspColor.Value
 	end
+	for _, esp in DarkSeaEsps do
+		esp.EspText.TextColor3 = Options.ChestEspColor.Value
+	end
 end)
 
-OtherBox:AddToggle("DarkSeaEsp", {
+EntityEspBox:AddToggle("DarkSeaEsp", {
 	Text = 'Dark sea  esp',
 	Default = false,
 	Tooltip = 'Allows you to see all prompts on loaded dark sea islands \n should include hecate, athenas pages, items etc',
@@ -1365,7 +1376,7 @@ OtherBox:AddToggle("DarkSeaEsp", {
 	Text = "Darksea esp"
 })
 
-OtherBox:AddButton({
+EnhancementBox:AddButton({
 	Text = 'Infinite Stamina',
 	Tooltip = "Gives you a very big amount of stamina. Has no downside. \n Cba making a reset. There's no reason to turn it off anyway",
 	Func = function()
@@ -1379,7 +1390,7 @@ OtherBox:AddButton({
 	end,
 })
 
-OtherBox:AddButton({
+WorldBox:AddButton({
 	Text = 'Disable ship collision damage',
 	Tooltip = 'Your ship no longer takes damage when bumping into stuff \n Effect goes away on ship despawn/refresh',
 	Func = function(Value)
@@ -1394,7 +1405,7 @@ OtherBox:AddButton({
 	end,
 })
 
-OtherBox:AddButton({
+WorldBox:AddButton({
 	Text = "Optimize lighting",
 	Tooltip = "Disable fog, shadows, make it brighter, etc",
 	Func = function(Value)
@@ -1429,7 +1440,7 @@ OtherBox:AddButton({
 	end,
 })
 
-OtherBox:AddButton({
+EnhancementBox:AddButton({
 	Text = "Disable fall damage",
 	Tooltip = "Disables fall damage",
 	Func = function()
@@ -1439,7 +1450,7 @@ OtherBox:AddButton({
 	end,
 })
 
-OtherBox:AddToggle("WashToggle", {
+EnhancementBox:AddToggle("WashToggle", {
 	Text = "Wash",
 	Default = false,
 	Tooltip = "Removes dark sea weather poison",
@@ -1457,7 +1468,7 @@ OtherBox:AddToggle("WashToggle", {
 	Text = "Wash"
 })
 
-OtherBox:AddButton({
+EnhancementBox:AddButton({
 	Text = "Infinite Zoom",
 	Tooltip = "Allows you to scroll your camera forever",
 	Func = function()
@@ -1465,7 +1476,7 @@ OtherBox:AddButton({
 	end,
 })
 
-OtherBox:AddInput("RodBox",
+FishingBox:AddInput("RodBox",
 	{
 		Default = "Wooden Rod",
 		Numeric = false,
@@ -1476,7 +1487,7 @@ OtherBox:AddInput("RodBox",
 )
 
 
-OtherBox:AddInput("BaitBox",
+FishingBox:AddInput("BaitBox",
 	{
 		Default = "Normal Bait",
 		Numeric = false,
@@ -1486,7 +1497,7 @@ OtherBox:AddInput("BaitBox",
 	}
 )
 
-OtherBox:AddToggle("AutoFishToggle", {
+FishingBox:AddToggle("AutoFishToggle", {
 	Text = "Silent Autofish",
 	Tooltip = "Catches fish without using rod",
 	Default = false,
@@ -1525,7 +1536,7 @@ OtherBox:AddToggle("AutoFishToggle", {
 	end,
 })
 
-OtherBox:AddButton({
+EntityEspBox:AddButton({
 	Text = "Delete all Esps",
 	Tooltip = "Deletes all current esps",
 	Func = function()
@@ -1535,7 +1546,7 @@ OtherBox:AddButton({
 	end,
 })
 
-OtherBox:AddToggle("GodModeToggle", {
+EnhancementBox:AddToggle("GodModeToggle", {
 	Text = 'God Mode',
 	Default = false,
 	Tooltip = 'Blocks incoming damage from NPCs (requires hookmetamethod)',
@@ -1590,14 +1601,14 @@ OtherBox:AddToggle("GodModeToggle", {
 	Text = "God Mode"
 })
 
-OtherBox:AddInput("HitboxScale", {
+EnhancementBox:AddInput("HitboxScale", {
 	Default = "2",
 	Text = "Hitbox scale",
 	Numeric = true,
 	Finished = true,
 })
 
-OtherBox:AddToggle("HitboxToggle", {
+EnhancementBox:AddToggle("HitboxToggle", {
 	Text = 'Hitbox Expander',
 	Default = false,
 	Tooltip = 'Scales all enemy hitboxes by the multiplier',
@@ -1629,7 +1640,7 @@ OtherBox:AddToggle("HitboxToggle", {
 
 
 
-LeftRandomBox:AddDropdown("MeatType", {
+EconomyBox:AddDropdown("MeatType", {
 	Values = {
 		"Sparrow",
 		"Raven",
@@ -1645,7 +1656,7 @@ LeftRandomBox:AddDropdown("MeatType", {
 
 })
 
-LeftRandomBox:AddToggle('MeatFarmToggle', {
+EconomyBox:AddToggle('MeatFarmToggle', {
 	Text = "Toggle meat farm",
 	Tooltip = "Automatically gives meat",
 	Default = false,
@@ -1667,14 +1678,14 @@ LeftRandomBox:AddToggle('MeatFarmToggle', {
 	end,
 })
 
-LeftRandomBox:AddInput('ItemToSell', {
+EconomyBox:AddInput('ItemToSell', {
 	Text = "Item to sell",
 	Tooltip = 'Sells all of item',
 	Default = '',
 	Finished = true
 })
 
-LeftRandomBox:AddButton({
+EconomyBox:AddButton({
 	Text = 'Sell nearest npc',
 	Tooltip = 'Sells all of item to nearest npc (need to be close)',
 	Func = function()
@@ -1728,7 +1739,7 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-LeftRandomBox:AddButton({
+EconomyBox:AddButton({
 	Text = 'Buy all near npc items',
 	Tooltip = 'Buys all of item of nearest npc (need to be close)',
 	Func = function()
@@ -1771,7 +1782,7 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-LeftRandomBox:AddInput('Deckhand', {
+EconomyBox:AddInput('Deckhand', {
 	Text = "Insert Deckhand Number",
 	Tooltip = 'Insert deckhand number to change task',
 	Default = '',
@@ -1779,14 +1790,14 @@ LeftRandomBox:AddInput('Deckhand', {
 	Finished = true
 })
 
-LeftRandomBox:AddInput('DeckhandTask', {
+EconomyBox:AddInput('DeckhandTask', {
 	Text = "Insert Deckhand task",
 	Tooltip = 'Insert task to give to deckhand',
 	Default = '',
 	Finished = true
 })
 
-LeftRandomBox:AddButton({
+EconomyBox:AddButton({
 	Text = "Give task",
 	Tooltip = "Gives inserted task to deckhand",
 	Func = function()
@@ -1799,7 +1810,7 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-LeftRandomBox:AddButton({
+EconomyBox:AddButton({
 	Text = "Restock Supplies",
 	Tooltip = "Restock fleet supplies",
 	Func = function()
@@ -1811,7 +1822,7 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-LeftRandomBox:AddButton({
+WorldBox:AddButton({
 	Text = "Discover all islands",
 	Tooltip = "Discovers all islands",
 	Func = function()
@@ -1825,7 +1836,7 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-LeftRandomBox:AddToggle('GalleonFarmToggle', {
+EconomyBox:AddToggle('GalleonFarmToggle', {
 	Text = "Toggle farm galleons",
 	Tooltip = "Automatically gives galleons",
 	Default = false,
@@ -1845,7 +1856,7 @@ LeftRandomBox:AddToggle('GalleonFarmToggle', {
 	end,
 })
 
-LeftRandomBox:AddInput('DrachmaAmount', {
+EconomyBox:AddInput('DrachmaAmount', {
 	Text = "Insert Drachma Amount",
 	Tooltip = 'Insert drachma amount to withdraw/deposit \nTakes from paramount bank',
 	Default = '',
@@ -1853,7 +1864,7 @@ LeftRandomBox:AddInput('DrachmaAmount', {
 	Finished = true
 })
 
-LeftRandomBox:AddButton({
+EconomyBox:AddButton({
 	Text = "Withdraw drachma",
 	Tooltip = "Withdraws drachma from paramount bank",
 	Func = function()
@@ -1864,7 +1875,7 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-LeftRandomBox:AddButton({
+EconomyBox:AddButton({
 	Text = "Deposit drachma",
 	Tooltip = "Deposits drachma from paramount bank",
 	Func = function()
@@ -1875,7 +1886,7 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-LeftRandomBox:AddButton({
+EconomyBox:AddButton({
 	Text = "Upgrade bank",
 	Tooltip = "Upgrades bank if enough money stored",
 	Func = function()
@@ -1883,7 +1894,7 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-LeftRandomBox:AddToggle("InsanityToggle", {
+WorldBox:AddToggle("InsanityToggle", {
 	Text = "Disable insanity",
 	Default = false,
 	Tooltip = "Disables insanity effects. Doesn't disable damage",
@@ -1899,7 +1910,7 @@ LeftRandomBox:AddToggle("InsanityToggle", {
 	Text = "Disable insanity"
 })
 
-LeftRandomBox:AddButton({
+WorldBox:AddButton({
 	Text = "Disable dark sea rain",
 	Tooltip = "Disables dark sea rain",
 	Func = function()
@@ -1907,7 +1918,7 @@ LeftRandomBox:AddButton({
 	end,
 })
 
-RightRandomBox:AddToggle('ModToggle', {
+CombatBox:AddToggle('ModToggle', {
 	Text = "Kick if mod in server",
 	Tooltip = "Will kick you if a join is in or joins the server",
 	Default = false,
@@ -1937,7 +1948,7 @@ RightRandomBox:AddToggle('ModToggle', {
 })
 
 local object = workspace
-RightRandomBox:AddInput('KillMessage', {
+CombatBox:AddInput('KillMessage', {
 	Text = "Kill message",
 	Tooltip = 'Changes the kill message for kill all \nIt will only work if the item exists as an object',
 	Default = '',
@@ -1954,7 +1965,7 @@ RightRandomBox:AddInput('KillMessage', {
 	end,
 })
 
-RightRandomBox:AddToggle('KillAllToggle', {
+CombatBox:AddToggle('KillAllToggle', {
 	Text = "Kill all players",
 	Tooltip = "Kills all players in the server except you \n Doesn't track back to you in any way",
 	Callback = function(Value)
