@@ -29,7 +29,6 @@ local Window = Library:CreateWindow({
 
 local Tabs = {
 	Main = Window:AddTab('Main'),
-	Op = Window:AddTab('Op'),
 	Randoms = Window:AddTab("Random stuff"),
 	['UI Settings'] = Window:AddTab('UI Settings'),
 }
@@ -208,12 +207,11 @@ local CannonToggleConn
 local DarkSeaConns = {}
 local ChestAddConns = {}
 local ChestRemoveConns = {}
-local godModeTask
 local autoFishConn
+local godModeTask
 local ESPConnection
 local ESP_OBJECTS = {}
 local MeatToggle
-local killAllBoats
 local GalleonToggle
 local ModConn
 local killAllConn
@@ -349,12 +347,6 @@ local disableFunctions = {
 		end
 		MeatToggle = nil
 	end,
-	KillAllBoats = function()
-		if killAllBoats then
-			task.cancel(killAllBoats)
-		end
-		killAllBoats = nil
-	end,
 	GalleonFarmToggle = function()
 		if GalleonToggle then
 			task.cancel(GalleonToggle)
@@ -391,8 +383,6 @@ local TpCannonballs
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox('Attack Teleports')
 local MovementBox = Tabs.Main:AddRightGroupbox("Movement")
 local OtherBox = Tabs.Main:AddLeftGroupbox("Other")
-local LeftOpBox = Tabs.Op:AddLeftGroupbox('Op')
-local RightOpBox = Tabs.Op:AddRightGroupbox('Item Stats')
 local LeftRandomBox = Tabs.Randoms:AddLeftGroupbox('Stuff')
 local RightRandomBox = Tabs.Randoms:AddRightGroupbox('More stuff')
 
@@ -956,15 +946,19 @@ OtherBox:AddToggle("TreasureChestToggle",{
 
 
 local function trackChest(chest)
-	local obj =  chest:FindFirstChild("ChestObj")
-	if obj and chest.Name ~= "Private Storage" and (chest.Name ~= "Treasure Chest" or Toggles.TreasureChestToggle.Value)  and not chest:FindFirstChild("Open") then
+	local obj = chest:FindFirstChild("ChestObj")
+	local allowed = chest.Name == "Rare Chest" or chest.Name == "Mystic Chest" or chest.Name == "Legendary Chest"
+	if obj and allowed and not chest:FindFirstChild("Open") then
 		if chest:IsA("Model") then
 			local part = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
 			if part then
-				local color = Options.ChestEspColor.Value
-				if chest.Name ~= "Treasure Chest" and chest.Name ~= "Uncommon Chest" and chest.Name ~= "Rare Chest" then
-					local h, s, v = color:ToHSV()
-					color = Color3.fromHSV((h + 0.5) % 1, math.clamp(s + 0.4, 0.7, 1), math.clamp(v + 0.2, 0.7, 1))
+				local color
+				if chest.Name == "Rare Chest" then
+					color = Color3.new(0, 0, 1)
+				elseif chest.Name == "Mystic Chest" then
+					color = Color3.new(1, 0, 0)
+				elseif chest.Name == "Legendary Chest" then
+					color = Color3.new(0, 1, 0)
 				end
 				local esp = createText(chest.Name, color, part)
 				chestEsps[chest] = esp
@@ -1484,188 +1478,10 @@ OtherBox:AddButton({
 	end,
 })
 
-LeftOpBox:AddToggle('PvpToggleKill', {
-	Text = 'Target Player',
+OtherBox:AddToggle("GodModeToggle", {
+	Text = 'God Mode',
 	Default = false,
-	Tooltip = 'Will kill nearest player'
-})
-
-LeftOpBox:AddToggle("PveToggleKill",{
-	Text = 'Target Npc',
-	Default = true,
-	Tooltip = 'Will kill nearest NPC'
-})
-
-LeftOpBox:AddButton({
-	Text = "Kill nearest enemy (LOW RISK)",
-	Default = false,
-	Tooltip = "It will kill nearest enemy. \n Don't spam it on sea monsters. (will get you banned on death)",
-	Func = function(Value)
-		local function getClosestEnemy()
-			if not character then return nil end
-
-			local hrp = character:FindFirstChild("HumanoidRootPart")
-			if not hrp then return nil end
-			local pve = Toggles.PveToggleKill.Value
-			local pvp = Toggles.PvpToggleKill.Value
-
-			local mobDist = math.huge
-			local closestEnemy
-			for enemy in pairs(enemies) do
-				if enemy:IsA("Model") then
-					if not pvp and enemy.Parent == workspace then
-						continue
-					end
-					if not pve and enemy.Parent == workspace.Enemies then
-						continue
-					end
-
-					local enemyHRP = enemy:FindFirstChild("HumanoidRootPart")
-					local hum = enemy:FindFirstChildOfClass("Humanoid")
-					if hum then
-						if hum.Health <= 0 then
-							continue
-						end
-					else
-						local atts = enemy:FindFirstChild("Attributes")
-						if atts then
-							local Health = atts:FindFirstChild("Health")
-							if not Health or Health.Value <= 0 then
-								continue
-							end
-						end
-					end
-					if enemyHRP then
-						local distance = (enemyHRP.Position - hrp.Position).Magnitude
-						if distance < mobDist then
-							mobDist = distance
-							closestEnemy = enemy
-						end
-					end
-				end
-			end
-			return closestEnemy
-		end
-		local closestEnemy = getClosestEnemy()
-		local args = {
-			character,
-			closestEnemy,
-			"Metal Magic",
-			"3",
-			'["Pulsar",1.7976931348623157e308,20,20,true,"Two Hands","25","Pulsar","Drill","Metal"]',
-			1,
-			1
-		}
-		game.ReplicatedStorage.RS.Remotes.Magic.DealAttackDamage:FireServer(unpack(args))
-	end
-})
-
-LeftOpBox:AddSlider('KillAuraSlider', {
-	Text = 'Kill aura distance',
-	Default = 100,
-	Min = 0,
-	Max = 500,
-	Rounding = 1,
-	Compact = false,
-})
-
-
-LeftOpBox:AddToggle("KillAuraToggle", {
-	Text = 'Kill Aura',
-	Default = false,
-	Tooltip = 'Gives you a kill aura. \nDont fly large distances on the sea with this on',
-	Callback = function(Value)
-		if Value then
-			killAuraTask = task.spawn(function()
-				while Toggles.KillAuraToggle.Value do
-					local closestEnemy
-					local pvp = Toggles.PvpToggleKill.Value
-					local pve = Toggles.PveToggleKill.Value
-					for enemy in pairs(enemies) do
-						if not pvp and enemy.Parent == workspace then
-							continue
-						end
-						if not pve and enemy.Parent == workspace.Enemies then
-							continue
-						end
-						local enemyHRP = enemy:FindFirstChild("HumanoidRootPart")
-						local hum = enemy:FindFirstChildOfClass("Humanoid")
-						if hum then
-							if hum.Health <= 0 then
-								continue
-							end
-						else
-							local atts = enemy:FindFirstChild("Attributes")
-							if atts then
-								local Health = atts:FindFirstChild("Health")
-								if not Health or Health.Value <= 0 then
-									continue
-								end
-							end
-						end
-						local plrHRP = character and character:FindFirstChild("HumanoidRootPart")
-						if enemyHRP and plrHRP then
-							local pos = enemyHRP.Position
-							local plrPos = plrHRP.Position
-							local distance = (pos - plrPos).Magnitude
-							if distance <= Options.KillAuraSlider.Value then
-								local args = {
-									game:GetService("Players").LocalPlayer.Character,
-									enemy,
-									"Metal Magic",
-									"3",
-									'["Pulsar",1.7976931348623157e308,20,20,true,"Two Hands","25","Pulsar","Drill","Metal"]',
-									1,
-									1
-								}
-								game.ReplicatedStorage.RS.Remotes.Magic.DealAttackDamage:FireServer(unpack(args))
-							end
-						end
-					end
-					task.wait(0.5)
-				end
-			end)
-		else
-			killAuraTask = nil
-		end
-	end,
-}):AddKeyPicker("KillAuraToggleKey", {
-	Default = "",
-	SyncToggleState = true,
-	Text = "Kill Aura"
-})
-
-
-LeftOpBox:AddSlider('DamageMultiSlider', {
-	Text = 'Damage Multiplier',
-	Default = 1,
-	Min = 1,
-	Max = 100,
-	Rounding = 1,
-	Compact = false,
-})
-
-LeftOpBox:AddInput('CurrentMagic', {
-	Text = "Current Magic",
-	Tooltip = '',
-	Default = '',
-	Finished = true
-})
-
-LeftOpBox:AddInput('NewMagic', {
-	Text = "New Magic",
-	Tooltip = '',
-	Default = 'Using this wont give you any kill credit',
-	Finished = true,
-	Callback = function(Value)
-		require(game.ReplicatedStorage.RS.Modules.Magic).Types[Options.CurrentMagic.Value] = require(game.ReplicatedStorage.RS.Modules.Magic).Types[Value]
-	end,
-})
-
-LeftOpBox:AddToggle("GodModeToggle", {
-	Text = 'Npc God Mode \ Dmg Multi',
-	Default = false,
-	Tooltip = 'Makes npcs unable to hit you / deal increased dmg \nrequires hookmetamethod',
+	Tooltip = 'Blocks incoming damage from NPCs (requires hookmetamethod)',
 	Callback = function(Value)
 		if Value then
 			godModeTask = hookmetamethod(game, "__namecall", newcclosure(function(remote, ...)
@@ -1674,12 +1490,6 @@ LeftOpBox:AddToggle("GodModeToggle", {
 					local method = getmethod()
 					if method == "FireServer" then
 						local args = {...}
-						local function damageMulti()
-							for i = 1, math.floor(Options.DamageMultiSlider.Value) do
-								godModeTask(remote, unpack(args))
-								task.wait()
-							end
-						end
 						if remote.Name == "TouchDamage" then
 							return
 						elseif remote.Name == "DealBossDamage" then
@@ -1691,34 +1501,17 @@ LeftOpBox:AddToggle("GodModeToggle", {
 						elseif remote.Name == "DealAttackDamage" then
 							if args[2] == character then
 								return
-							else
-								local old, new = Options.CurrentMagic.Value, Options.NewMagic.Value
-								if old ~= '' and old ~= new then
-									args[1] = workspace
-									args[3] = new
-								end
-								damageMulti()
-								return
 							end
 						elseif remote.Name == "DealWeaponDamage" then
 							if args[3] == character then
-								return
-							else
-								damageMulti()
 								return
 							end
 						elseif remote.Name == "DealSWDamage" then
 							if args[3] == character then
 								return
-							else
-								damageMulti()
-								return
 							end
 						elseif remote.Name == "DealStrengthDamage" then
 							if args[3] == character then
-								return
-							else
-								damageMulti()
 								return
 							end
 						elseif remote.Name == "DealAnimalDamage" then
@@ -1737,314 +1530,10 @@ LeftOpBox:AddToggle("GodModeToggle", {
 }):AddKeyPicker("GodModeToggleKey", {
 	Default = "",
 	SyncToggleState = true,
-	Text = "God Mode / Dmg Multi"
+	Text = "God Mode"
 })
 
 
-RightOpBox:AddInput("ItemName",
-	{
-		Default = "",
-		Finished = false,
-		Text = "Item to modify",
-		Tooltip = "Modifies the stats of the item. \nMake sure to put the item name (enchant name not included)"
-	}
-)
-
-RightOpBox:AddInput("SizeStat",
-	{
-		Default = "",
-		Numeric = true,
-		Finished = false,
-		Text = "Size stat",
-		Tooltip = ""
-	}
-)
-
-RightOpBox:AddInput("RangeStat",
-	{
-		Default = "",
-		Numeric = true,
-		Finished = false,
-		Text = "Range stat",
-		Tooltip = ""
-	}
-)
-
-RightOpBox:AddInput("DexterityStat",
-	{
-		Default = "",
-		Numeric = true,
-		Finished = false,
-		Text = "Dexterity stat",
-		Tooltip = ""
-	}
-)
-
-RightOpBox:AddToggle("ItemStatToggle", {
-	Text = "Apply stats",
-	Tooltip = "Applies the select stats to selected item. \n (toggle bugged)",
-	Default = false,
-	Callback = function(Value)
-		if Value then
-			local modu = require(game.ReplicatedStorage.RS.Modules.Inventory)
-			local item = modu.Items[Options.ItemName.Value]
-			local istats = item["Stats"]
-			local size = tonumber(Options.SizeStat.Value)
-			local range = tonumber(Options.RangeStat.Value)
-			local dexterity = tonumber(Options.DexterityStat.Value)
-			local values = {
-				Size = size,
-				Range = range,
-				Dexterity = dexterity
-			}
-			if istats then
-
-				for i, v in pairs(values) do
-					if v then
-						istats[i] = v
-					end
-				end
-			else
-				item["Stats"] = values
-			end
-		end
-	end,
-})
-
-RightOpBox:AddButton({
-	Text = 'True Immortality',
-	Tooltip = "breaks some stuff visible to others",
-	Func = function()
-		local args = {
-			workspace,
-			character,
-			"Metal Magic",
-			"3",
-			'["Pulsar",150,20,20,true,"Two Hands","25","Leap","Drill","Metal"]',
-			1,
-			0/0
-		}
-		game.ReplicatedStorage.RS.Remotes.Magic.DealAttackDamage:FireServer(unpack(args))
-	end,
-})
-
-LeftOpBox:AddToggle('PvpBoatToggle', {
-	Text = 'Target Player THESE FUNCTIOS NEED A FIGHTING STYLE',
-	Default = false,
-	Tooltip = 'Will kill nearest player boat'
-})
-
-LeftOpBox:AddToggle("PveBoatToggle",{
-	Text = 'Target Npc',
-	Default = true,
-	Tooltip = 'Will kill nearest NPC boat'
-})
-
-LeftOpBox:AddInput("FightingStyleBox", {
-	Text = "Equipped fighting style",
-	Default = "Basic Combat",
-	Tooltip = "You need to write a fighting style you have equipped for it to work"
-
-})
-
-LeftOpBox:AddButton({
-	Text = "Destroy nearest boat",
-	Default = false,
-	Tooltip = "Destroys the nearest boat",
-	Func = function(Value)
-		local function getClosestBoat()
-			if not character then return nil end
-
-			local hrp = character:FindFirstChild("HumanoidRootPart")
-			if not hrp then return nil end
-			local pve = Toggles.PvpBoatToggle.Value
-			local pvp = Toggles.PveBoatToggle.Value
-
-			local bestDist = math.huge
-			local closestBoat
-			for _, boat in ipairs(workspace.Boats:GetChildren()) do
-				if boat:IsA("Model") then
-					if not pvp and boat:FindFirstChild("Owner") and boat.Owner.Value and boat.Owner.Value ~= player then
-						continue
-					end
-					if not pve and not boat:FindFirstChild("Owner") then
-						continue
-					end
-
-					local primaryPart = boat.PrimaryPart
-					if not primaryPart then
-						continue
-					end
-
-					local dura = boat:FindFirstChild("Dura")
-					if not dura or dura.Value <= 0 then
-						continue
-					end
-
-					local distance = (primaryPart.Position - hrp.Position).Magnitude
-					if distance < bestDist then
-						bestDist = distance
-						closestBoat = boat
-					end
-				end
-			end
-			return closestBoat
-		end
-		local boat = getClosestBoat()
-		for i = 1, 500 do
-			local args = {
-				0,
-				character,
-				boat,
-				player.Backpack:FindFirstChild(Options.FightingStyleBox.Value),
-				"Attack"
-			}
-			game.ReplicatedStorage.RS.Remotes.Combat.DealDamageBoat3:FireServer(unpack(args))
-			task.wait()
-		end
-	end
-})
-
-LeftOpBox:AddSlider('BoatKillAuraSlider', {
-	Text = 'Kill boat aura distance',
-	Default = 1000,
-	Min = 0,
-	Max = 2500,
-	Rounding = 1,
-	Compact = false,
-})
-
-
-local boatKillAuraTask
-LeftOpBox:AddToggle("BoatKillAura", {
-	Text = 'Boat Kill Aura',
-	Default = false,
-	Tooltip = 'Gives you a boat kill aura',
-	Callback = function(Value)
-		if Value then
-			boatKillAuraTask = task.spawn(function()
-				while Toggles.BoatKillAura.Value do
-					local closestEnemy
-					local pvp = Toggles.PvpBoatToggle.Value
-					local pve = Toggles.PveBoatToggle.Value
-					for _, boat in ipairs(workspace.Boats:GetChildren()) do
-						if not pvp and boat:FindFirstChild("Owner") and boat.Owner.Value and boat.Owner.Value ~= player then
-							continue
-						end
-						if not pve and not boat:FindFirstChild("Owner") then
-							continue
-						end
-
-						local primaryPart = boat.PrimaryPart
-						if not primaryPart then
-							continue
-						end
-
-						local dura = boat:FindFirstChild("Dura")
-						if not dura or dura.Value <= 0 then
-							continue
-						end
-
-						local plrHRP = character and character:FindFirstChild("HumanoidRootPart")
-						if plrHRP then
-							local pos = primaryPart.Position
-							local plrPos = plrHRP.Position
-							local distance = (pos - plrPos).Magnitude
-							if distance <= Options.BoatKillAuraSlider.Value then
-								for i = 1, 100 do
-									local args = {
-										0,
-										character,
-										boat,
-										player.Backpack:FindFirstChild(Options.FightingStyleBox.Value),
-										"Attack"
-									}
-									game.ReplicatedStorage.RS.Remotes.Combat.DealDamageBoat3:FireServer(unpack(args))
-									task.wait()
-								end
-							end
-						end
-					end
-					task.wait(0.35)
-				end
-			end)
-		else
-			boatKillAuraTask = nil
-		end
-	end,
-}):AddKeyPicker("BoatKillAuraToggleKey", {
-	Default = "",
-	SyncToggleState = true,
-	Text = "Boat Kill Aura"
-})
-
-local boatsDamaged = {}
-LeftOpBox:AddToggle("KillAllBoats", {
-	Text = "Kill all boats",
-	Tooltip = "Kill all boats in games except for players",
-	Default = false,
-	Callback = function(Value)
-		if Value then
-			if not character then return nil end
-
-			local hrp = character:FindFirstChild("HumanoidRootPart")
-			if not hrp then return nil end
-			killAllBoats = task.spawn(function()
-				while task.wait(0.3) do
-					local function getClosestBoat()
-						local bestDist = math.huge
-						local closestBoat
-						for _, boat in ipairs(game.ReplicatedStorage.RS.UnloadNPCShips:GetChildren()) do
-							if boat:IsA("Model") then
-
-								local primaryPart = boat.PrimaryPart
-								if not primaryPart then
-									continue
-								end
-								if boat:FindFirstChild("OwnerPlayer") then continue end
-
-								local dura = boat:FindFirstChild("Dura")
-								if not dura or dura.Value <= 0 then
-									boatsDamaged[boat] = nil
-									continue
-								end
-								if boatsDamaged[boat] and boatsDamaged[boat] > 50 then
-									continue
-								end
-
-								local distance = (primaryPart.Position - hrp.Position).Magnitude
-								if distance < bestDist then
-									bestDist = distance
-									closestBoat = boat
-								end
-							end
-						end
-						return closestBoat
-					end
-					local boat = getClosestBoat()
-					for i = 1, 500 do
-						local args = {
-							0,
-							character,
-							boat,
-							player.Backpack:FindFirstChild(Options.FightingStyleBox.Value),
-							"Attack"
-						}
-						game.ReplicatedStorage.RS.Remotes.Combat.DealDamageBoat3:FireServer(unpack(args))
-						task.wait()
-					end
-					if boatsDamaged[boat] then
-						boatsDamaged[boat] += 1
-					else
-						boatsDamaged[boat] = 1
-					end
-				end
-			end)
-		else
-			disableFunctions["KillAllBoats"]()
-		end
-	end,
-})
 
 LeftRandomBox:AddDropdown("MeatType", {
 	Values = {
@@ -2397,8 +1886,6 @@ Library:OnUnload(function()
 		func()
 	end
 	espParts:Destroy()
-	killAuraTask = nil
-	boatKillAuraTask = nil
 	print('Unloaded!')
 	Library.Unloaded = true
 end)
