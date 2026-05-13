@@ -874,6 +874,22 @@ MovementBox:AddToggle("CtrlClickToggle",{
 	end,
 })
 
+MovementBox:AddButton({
+	Text = "Fix character",
+	Tooltip = "Resets velocity and re-syncs your character with the server (fixes stuck abilities after TP)",
+	Func = function()
+		local hrp = character and character:FindFirstChild("HumanoidRootPart")
+		local hum = character and character:FindFirstChildOfClass("Humanoid")
+		if hrp and hum then
+			hrp.AssemblyLinearVelocity = Vector3.new()
+			hrp.AssemblyAngularVelocity = Vector3.new()
+			hum.PlatformStand = true
+			task.wait(0.1)
+			hum.PlatformStand = false
+		end
+	end,
+})
+
 OtherBox:AddLabel('Chest Esp Color'):AddColorPicker('ChestEspColor', {
 	Default = Color3.new(1, 1, 1),
 	Title = 'CHEST ESP COLOR',
@@ -1978,7 +1994,21 @@ MenuGroup:AddToggle('Keybindmenu', {
 
 MenuGroup:AddButton('Copy discord link', function() setclipboard("https://discord.gg/sqtHCHXzCG") end)
 
-MenuGroup:AddButton('Unload', function() Library:Unload() end)
+MenuGroup:AddToggle("UnloadToggle", {
+	Text = "Unload script",
+	Default = false,
+	Tooltip = "Completely unloads the GUI so you can rerun the script",
+	Callback = function(Value)
+		if Value then
+			Library:Unload()
+		end
+	end,
+}):AddKeyPicker("UnloadKey", {
+	Default = "",
+	SyncToggleState = true,
+	Text = "Unload"
+})
+
 MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu keybind' })
 
 Library.ToggleKeybind = Options.MenuKeybind
