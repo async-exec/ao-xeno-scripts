@@ -751,11 +751,18 @@ MovementBox:AddDropdown('TpPlayerDropdown', {
 	Values = refreshPlayerList(),
 	Default = 0,
 	Multi = false,
-	Text = 'Tp to player',
-	Tooltip = 'Teleports to selected player',
-	Callback = function(Value)
+	Text = 'Select player',
+	Tooltip = 'Select a player to teleport to',
+})
+
+MovementBox:AddButton({
+	Text = "Tp to selected player",
+	Tooltip = "Teleports to the player selected in the dropdown",
+	Func = function()
+		local name = Options.TpPlayerDropdown.Value
+		if name == "" or name == "No players" then return end
 		if character and character.HumanoidRootPart then
-			local target = game.Players:FindFirstChild(Value)
+			local target = game.Players:FindFirstChild(name)
 			if target then
 				local char = target.Character
 				local hrp = char and char:FindFirstChild("HumanoidRootPart")
