@@ -221,11 +221,25 @@ local function getClosestBoat(pve: boolean?, pvp: boolean?): Model?
 end
 
 local function teleportTo(cframe)
-	local hrp = character and character:FindFirstChild("HumanoidRootPart")
-	if not hrp then return end
-	hrp.CFrame = cframe
-	hrp.AssemblyLinearVelocity = Vector3.new()
-	hrp.AssemblyAngularVelocity = Vector3.new()
+tlocal hrp = character and character:FindFirstChild("HumanoidRootPart")
+tif not hrp then return end
+tlocal startPos = hrp.Position
+tlocal targetPos = cframe.Position
+tlocal dist = (targetPos - startPos).Magnitude
+tif dist > 100 then
+ttlocal steps = math.floor(dist / 100)
+ttlocal rot = cframe - cframe.Position
+ttfor i = 1, steps do
+tttlocal pos = startPos:Lerp(targetPos, i / steps)
+ttthrp.CFrame = rot + pos
+ttthrp.AssemblyLinearVelocity = Vector3.new()
+ttthrp.AssemblyAngularVelocity = Vector3.new()
+ttttask.wait()
+ttend
+tend
+thrp.CFrame = cframe
+thrp.AssemblyLinearVelocity = Vector3.new()
+thrp.AssemblyAngularVelocity = Vector3.new()
 end
 
 -- CONNECTIONS
