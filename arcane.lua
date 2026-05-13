@@ -1275,7 +1275,7 @@ Options.ChestEspColor:OnChanged(function()
 end)
 
 EntityEspBox:AddToggle("DarkSeaEsp", {
-	Text = 'Dark sea  esp',
+	Text = 'Dark Seas ESP',
 	Default = false,
 	Tooltip = 'Allows you to see all prompts on loaded dark sea islands \n should include hecate, athenas pages, items etc',
 	Callback = function(Value)
@@ -1285,17 +1285,37 @@ EntityEspBox:AddToggle("DarkSeaEsp", {
 					local parent = prompt.Parent
 					local color = Color3.new(1,1,1)
 					local text
-					if  prompt.Name == "HecateEssence" then
+					if prompt.Name == "HecateEssence" then
 						color = Color3.new(0.364706, 0, 1)
 						text = "Hecate"
 					elseif prompt.Name == "AthenaWisdom" then
 						color = Color3.new(0.619608, 1, 0.482353)
 						text = "Athena Note"
+					elseif prompt.ObjectText == "Treasure Chest" then
+						if not Toggles.TreasureChestToggle.Value then continue end
+						color = Color3.new(1, 1, 1)
+						text = prompt.ObjectText
+					elseif prompt.ObjectText == "Uncommon Chest" then
+						if not Toggles.ChestToggle_Uncommon.Value then continue end
+						color = Color3.fromRGB(255, 255, 150)
+						text = prompt.ObjectText
+					elseif prompt.ObjectText == "Rare Chest" then
+						if not Toggles.ChestToggle_Rare.Value then continue end
+						color = Color3.fromRGB(100, 140, 255)
+						text = prompt.ObjectText
+					elseif prompt.ObjectText == "Mystic Chest" then
+						if not Toggles.ChestToggle_Mystic.Value then continue end
+						color = Color3.fromRGB(255, 100, 100)
+						text = prompt.ObjectText
+					elseif prompt.ObjectText == "Legendary Chest" then
+						if not Toggles.ChestToggle_Legendary.Value then continue end
+						color = Color3.fromRGB(100, 255, 130)
+						text = prompt.ObjectText
 					else
-						if prompt.ObjectText == "Prometheus's Acrimony" or prompt.ObjectText == "Moly" or prompt.ObjectText == "Legendary Chest" then
+						if prompt.ObjectText == "Prometheus's Acrimony" or prompt.ObjectText == "Moly" then
 							color = Color3.new(1, 0.92549, 0.490196)
 						end
-						if prompt.ObjectText == "Treasure Chest" or prompt.ObjectText == "Uncommon Chest" or prompt.ObjectText == "Thornflower" or prompt.ObjectText == "Seaweed"  then
+						if prompt.ObjectText == "Thornflower" or prompt.ObjectText == "Seaweed" then
 							continue
 						end
 						text = prompt.ObjectText
@@ -1327,11 +1347,31 @@ EntityEspBox:AddToggle("DarkSeaEsp", {
 					elseif child.Name == "AthenaWisdom" then
 						color = Color3.new(0.619608, 1, 0.482353)
 						text = "Athena Note"
+					elseif child.ObjectText == "Treasure Chest" then
+						if not Toggles.TreasureChestToggle.Value then return end
+						color = Color3.new(1, 1, 1)
+						text = child.ObjectText
+					elseif child.ObjectText == "Uncommon Chest" then
+						if not Toggles.ChestToggle_Uncommon.Value then return end
+						color = Color3.fromRGB(255, 255, 150)
+						text = child.ObjectText
+					elseif child.ObjectText == "Rare Chest" then
+						if not Toggles.ChestToggle_Rare.Value then return end
+						color = Color3.fromRGB(100, 140, 255)
+						text = child.ObjectText
+					elseif child.ObjectText == "Mystic Chest" then
+						if not Toggles.ChestToggle_Mystic.Value then return end
+						color = Color3.fromRGB(255, 100, 100)
+						text = child.ObjectText
+					elseif child.ObjectText == "Legendary Chest" then
+						if not Toggles.ChestToggle_Legendary.Value then return end
+						color = Color3.fromRGB(100, 255, 130)
+						text = child.ObjectText
 					else
-						if child.ObjectText == "Prometheus's Acrimony" or child.ObjectText == "Moly"  or child.ObjectText == "Legendary Chest" then
+						if child.ObjectText == "Prometheus's Acrimony" or child.ObjectText == "Moly" then
 							color = Color3.new(1, 0.92549, 0.490196)
 						end
-						if child.ObjectText == "Treasure Chest" or child.ObjectText == "Uncommon Chest" or child.ObjectText == "Thornflower" or child.ObjectText == "Seaweed" then
+						if child.ObjectText == "Thornflower" or child.ObjectText == "Seaweed" then
 							return
 						end
 						text = child.ObjectText
