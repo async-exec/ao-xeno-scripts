@@ -29,6 +29,24 @@ local Window = Library:CreateWindow({
 	MenuFadeTime = 0.2
 })
 
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 25, 0, 24)
+CloseButton.Position = UDim2.new(1, -26, 0, 1)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextSize = 16
+CloseButton.BorderSizePixel = 0
+CloseButton.AutoButtonColor = false
+CloseButton.ZIndex = 10
+CloseButton.Parent = Window.Holder
+
+CloseButton.MouseButton1Click:Connect(function()
+	if Library.Unloaded then return end
+	task.defer(Library.Unload, Library)
+end)
+
 local Tabs = {
 	Main = Window:AddTab('Main'),
 	Randoms = Window:AddTab("Random stuff"),
