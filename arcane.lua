@@ -856,27 +856,54 @@ OtherBox:AddLabel('Chest Esp Color'):AddColorPicker('ChestEspColor', {
 })
 
 OtherBox:AddToggle("TreasureChestToggle",{
-	Text = 'Toggle "treasure chest" esp',
+	Text = 'Common Chest',
 	Default = false,
-	Tooltip = 'Will make chest esp show/hide chests with name "Treasure Chest" \n You have to re enable chest esp to update',
+})
 
+OtherBox:AddToggle("ChestToggle_Uncommon", {
+	Text = "Uncommon Chest",
+	Default = false,
+})
+
+OtherBox:AddToggle("ChestToggle_Rare", {
+	Text = "Rare Chest",
+	Default = true,
+})
+
+OtherBox:AddToggle("ChestToggle_Mystic", {
+	Text = "Mystic Chest",
+	Default = true,
+})
+
+OtherBox:AddToggle("ChestToggle_Legendary", {
+	Text = "Legendary Chest",
+	Default = true,
 })
 
 
 local function trackChest(chest)
 	local obj = chest:FindFirstChild("ChestObj")
-	local allowed = chest.Name == "Rare Chest" or chest.Name == "Mystic Chest" or chest.Name == "Legendary Chest"
+	local allowed =
+		(chest.Name == "Treasure Chest" and Toggles.TreasureChestToggle.Value) or
+		(chest.Name == "Uncommon Chest" and Toggles.ChestToggle_Uncommon.Value) or
+		(chest.Name == "Rare Chest" and Toggles.ChestToggle_Rare.Value) or
+		(chest.Name == "Mystic Chest" and Toggles.ChestToggle_Mystic.Value) or
+		(chest.Name == "Legendary Chest" and Toggles.ChestToggle_Legendary.Value)
 	if obj and allowed and not chest:FindFirstChild("Open") then
 		if chest:IsA("Model") then
 			local part = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
 			if part then
 				local color
-				if chest.Name == "Rare Chest" then
-					color = Color3.new(0, 0, 1)
+				if chest.Name == "Treasure Chest" then
+					color = Color3.new(1, 1, 1)
+				elseif chest.Name == "Uncommon Chest" then
+					color = Color3.fromRGB(255, 255, 150)
+				elseif chest.Name == "Rare Chest" then
+					color = Color3.fromRGB(100, 140, 255)
 				elseif chest.Name == "Mystic Chest" then
-					color = Color3.new(1, 0, 0)
+					color = Color3.fromRGB(255, 100, 100)
 				elseif chest.Name == "Legendary Chest" then
-					color = Color3.new(0, 1, 0)
+					color = Color3.fromRGB(100, 255, 130)
 				end
 				local esp = createText(chest.Name, color, part)
 				chestEsps[chest] = esp
