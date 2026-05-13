@@ -759,7 +759,7 @@ MovementBox:AddDropdown('TpPlayerDropdown', {
 				local char = target.Character
 				local hrp = char and char:FindFirstChild("HumanoidRootPart")
 				if hrp then
-					character.HumanoidRootPart.CFrame = hrp.CFrame
+					character.HumanoidRootPart.CFrame = hrp.CFrame * CFrame.new(0, 5, 0)
 				end
 			end
 		end
@@ -789,7 +789,7 @@ MovementBox:AddButton({
 	Tooltip = "Teleports to your saved checkpoint",
 	Func = function()
 		if character and character.HumanoidRootPart and checkpointPos then
-			character.HumanoidRootPart.CFrame = CFrame.new(checkpointPos)
+			character.HumanoidRootPart.CFrame = CFrame.new(checkpointPos) * CFrame.new(0, 5, 0)
 		end
 	end,
 })
