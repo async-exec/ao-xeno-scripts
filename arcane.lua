@@ -22,7 +22,7 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
 local Window = Library:CreateWindow({
-	Title = "Kintama Hack",
+	Title = "Nigga Odyssey Hack",
 	Center = false,
 	AutoShow = true,
 	TabPadding = 8,
@@ -878,6 +878,51 @@ OtherBox:AddToggle("ChestToggle_Mystic", {
 OtherBox:AddToggle("ChestToggle_Legendary", {
 	Text = "Legendary Chest",
 	Default = true,
+})
+
+OtherBox:AddButton({
+	Text = "Tp to nearest chest",
+	Tooltip = "Teleports to the nearest chest of an enabled type",
+	Func = function()
+		if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+		local hrp = character.HumanoidRootPart
+		local closestDist = math.huge
+		local closestPos
+		local iterate = {
+			workspace.Map,
+			game.ReplicatedStorage.RS.UnloadIslands
+		}
+		for _, parent in ipairs(iterate) do
+			for _, island in ipairs(parent:GetChildren()) do
+				for _, v in ipairs(island:GetChildren()) do
+					if typeof(v) == "Instance" and v.Name == "Chests" then
+						for _, chest in v:GetChildren() do
+							if not chest:FindFirstChild("ChestObj") then continue end
+							if chest:FindFirstChild("Open") then continue end
+							local enabled =
+								(chest.Name == "Treasure Chest" and Toggles.TreasureChestToggle.Value) or
+								(chest.Name == "Uncommon Chest" and Toggles.ChestToggle_Uncommon.Value) or
+								(chest.Name == "Rare Chest" and Toggles.ChestToggle_Rare.Value) or
+								(chest.Name == "Mystic Chest" and Toggles.ChestToggle_Mystic.Value) or
+								(chest.Name == "Legendary Chest" and Toggles.ChestToggle_Legendary.Value)
+							if not enabled then continue end
+							local part = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+							if part then
+								local dist = (part.Position - hrp.Position).Magnitude
+								if dist < closestDist then
+									closestDist = dist
+									closestPos = part.Position
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		if closestPos then
+			hrp.CFrame = CFrame.new(closestPos) * CFrame.new(0, 5, 0)
+		end
+	end,
 })
 
 
